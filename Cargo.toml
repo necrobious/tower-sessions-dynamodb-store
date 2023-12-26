@@ -1,0 +1,39 @@
+[package]
+name = "tower-sessions-dynamodb-store"
+version = "0.1.0"
+edition = "2021"
+description = "AWS DynamoDB session store. Not for direct use; see the `tower-sessions` crate for details."
+authors = ["Kirk Peterson <necrobious@gmail.com>"]
+license = "MIT"
+homepage = "https://github.com/necrobious/tower-sessions-dynamodb-store"
+keywords = ["axum", "session", "sessions", "cookie", "tower", "dynamodb"]
+categories = ["asynchronous", "network-programming", "web-programming"]
+repository = "https://github.com/necrobious/tower-sessions-dynamodb-store"
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+async-trait = "0.1.73" 
+aws-config = "1.0.3"
+aws-sdk-dynamodb = "1.4.0"
+rmp-serde = { version = "1.1.2" }
+serde = { version = "1.0.192", features = ["derive", "rc"] } 
+thiserror = "1.0.50"
+time = { version = "0.3.30", features = ["serde"] }
+tower-sessions-core = "0.8.0"
+tracing = "0.1.40"
+
+[dev-dependencies]
+axum = "0.7.2"
+axum-core = "0.4.1"
+tokio = { version = "1.35.1", features = ["full"] }
+tower-sessions = { version = "0.8.2", features = ["deletion-task"] }
+tower = "0.4.13"
+tokio-test = "0.4.3"
+
+[[example]]
+name = "counter"
+
