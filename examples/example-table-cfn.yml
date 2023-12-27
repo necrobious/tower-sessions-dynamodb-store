@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  TowerSessions:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "session_id"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "session_id"
+          KeyType: "HASH"
+      TimeToLiveSpecification:
+        AttributeName: "expire_at"
+        Enabled: true
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
