@@ -1,19 +1,14 @@
 use std::net::SocketAddr;
 
 use axum::{
-    error_handling::HandleErrorLayer, response::IntoResponse, routing::get, BoxError, Router,
+    error_handling::HandleErrorLayer, http::StatusCode, response::IntoResponse, routing::get,
+    BoxError, Router,
 };
-use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 use time::Duration;
 use tower::ServiceBuilder;
-use tower_sessions_dynamodb_store::{
-    DynamoDBStore, DynamoDBStoreKey, DynamoDBStoreProps,
-};
-use tower_sessions::{
-    ExpiredDeletion, Expiry, Session,
-    SessionManagerLayer,
-};
+use tower_sessions::{ExpiredDeletion, Expiry, Session, SessionManagerLayer};
+use tower_sessions_dynamodb_store::{DynamoDBStore, DynamoDBStoreKey, DynamoDBStoreProps};
 const COUNTER_KEY: &str = "counter";
 
 #[derive(Serialize, Deserialize, Default)]
