@@ -135,7 +135,7 @@ pub struct DynamoDBStoreProps {
 impl Default for DynamoDBStoreProps {
     fn default() -> Self {
         Self {
-            table_name: "tower-sessions".to_string(),
+            table_name: "TowerSessions".to_string(),
             partition_key: DynamoDBStoreKey::default(),
             sort_key: None,
             expirey_name: "expire_at".to_string(),
