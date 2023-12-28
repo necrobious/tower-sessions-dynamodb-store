@@ -1,12 +1,12 @@
 [package]
 name = "tower-sessions-dynamodb-store"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "AWS DynamoDB session store. Not for direct use; see the `tower-sessions` crate for details."
 authors = ["Kirk Peterson <necrobious@gmail.com>"]
 license = "MIT"
 homepage = "https://github.com/necrobious/tower-sessions-dynamodb-store"
-keywords = ["axum", "session", "sessions", "cookie", "tower", "dynamodb"]
+keywords = ["session", "sessions", "cookie", "tower", "dynamodb"]
 categories = ["asynchronous", "network-programming", "web-programming"]
 repository = "https://github.com/necrobious/tower-sessions-dynamodb-store"
 readme = "README.md"

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+## [0.1.1] - 2023-12-27
+
+### Fixed
+
+- fixed error when publishing to crates.io: `the remote server responded with an error: expected at most 5 keywords per crate` 
+
 ## [0.1.0] - 2023-12-27
 
 ### Added
