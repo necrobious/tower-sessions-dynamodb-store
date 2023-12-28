@@ -12,7 +12,7 @@ This create provides an AWS DynamoDB back-end for the tower-session session mana
 
 ## Usage
 
-Setting a `DynamoDBSessionStore` requires two parameters:
+Setting a `DynamoDBStore` requires two parameters:
  - An `aws_sdk_dynamodb::Client` instance, for connecting to the AWS DynamoDB service.
  - A `DynamoDBStoreProps` instance, to tell the Session Store where in dynamo to find/save things.
 
@@ -54,8 +54,33 @@ Will create a store props instance that:
 
 All items can be overwritten safely, with the only current assumption of your DynamoDB table is that the Partition Key and Range Key properties are both of type S (String).
 
+### `DynamoDBStore`
 
-You can find a complete [example][counter-example] in the [example directory][examples].
+Once you have instances of `aws_sdk_dynamodb::Client` and `DynamoDBStoreProps` created, a `DynamoDBStore` instance
+can be configured and passed to the tower-sessions session manager:
+
+```rust
+use axum::{
+    error_handling::HandleErrorLayer, http::StatusCode, BoxError, 
+};
+use time::Duration;
+use tower::ServiceBuilder;
+use tower_sessions::{ExpiredDeletion, Expiry, Session, SessionManagerLayer};
+use tower_sessions_dynamodb_store::DynamoDBStore;
+
+let session_store = DynamoDBStore::new(client, store_props);
+let session_service = ServiceBuilder::new()
+    .layer(HandleErrorLayer::new(|e: BoxError| async move {
+        StatusCode::BAD_REQUEST
+    }))
+    .layer(
+        SessionManagerLayer::new(session_store)
+            .with_secure(false)
+            .with_expiry(Expiry::OnInactivity(Duration::hours(1))),
+    );
+```
+
+You can find a complete [example](examples/counter.rs) in the [example directory](examples).
 
 
 ## Examples
