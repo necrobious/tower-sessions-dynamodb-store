@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+## [0.1.2] - 2023-12-27
+
+### Fixed
+
+- Updated crate dependencies. 
+
 ## [0.1.1] - 2023-12-27
 
 ### Fixed
