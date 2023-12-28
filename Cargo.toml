@@ -17,13 +17,13 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 async-trait = "0.1.73" 
-aws-config = "1.0.3"
-aws-sdk-dynamodb = "1.4.0"
+aws-config = "1.1.1"
+aws-sdk-dynamodb = "1.9.0"
 rmp-serde = { version = "1.1.2" }
-serde = { version = "1.0.192", features = ["derive", "rc"] } 
-thiserror = "1.0.50"
+serde = { version = "1.0.193", features = ["derive", "rc"] }
+thiserror = "1.0.52"
 time = { version = "0.3.30", features = ["serde"] }
-tower-sessions-core = "0.8.0"
+tower-sessions-core = "0.8.2"
 tracing = "0.1.40"
 
 [dev-dependencies]
