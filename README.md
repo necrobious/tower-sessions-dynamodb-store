@@ -22,9 +22,9 @@ There are many possibilities for Setting up a `aws_sdk_dynamodb::Client` but all
 from the [aws_config rustdocs](https://docs.rs/aws-config/latest/aws_config/) along with many other examples:
 
 ```rust
-use aws_config::BehaviorVersion;
-mod aws_sdk_dynamodb {
-let config = aws_config::load_defaults(BehaviorVersion::v2023_11_09()).await;
+use aws_config;
+use aws_sdk_dynamodb;
+let config = aws_config::load_defaults(aws_config::BehaviorVersion::v2023_11_09()).await;
 let client = aws_sdk_dynamodb::Client::new(&config);
 ```
 
