@@ -13,7 +13,7 @@ use aws_sdk_dynamodb::{
     Client,
 };
 use time::OffsetDateTime;
-use tower_sessions_core::{
+use tower_sessions::{
     session::{Id, Record},
     session_store, ExpiredDeletion, SessionStore,
 };
@@ -159,7 +159,7 @@ impl DynamoDBStore {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use tower_sessions::{aws_config, aws_sdk_dynamodb, DynamoDBStore, DynamoDBStoreProps};
+    /// use tower_sessions_dynamodb_store::{aws_config, aws_sdk_dynamodb, DynamoDBStore, DynamoDBStoreProps};
     ///
     /// let store_props = DynamoDBStoreProps::default();
     ///

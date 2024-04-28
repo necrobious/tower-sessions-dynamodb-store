@@ -1,9 +1,6 @@
 use std::net::SocketAddr;
 
-use axum::{
-    error_handling::HandleErrorLayer, http::StatusCode, response::IntoResponse, routing::get,
-    BoxError, Router,
-};
+use axum::{response::IntoResponse, routing::get, Router};
 use serde::{Deserialize, Serialize};
 use time::Duration;
 use tower::ServiceBuilder;
@@ -96,16 +93,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
     );
 
-    let session_service = ServiceBuilder::new()
-        .layer(HandleErrorLayer::new(|e: BoxError| async move {
-            println!("error: {:?}", e);
-            StatusCode::BAD_REQUEST
-        }))
-        .layer(
-            SessionManagerLayer::new(session_store)
-                .with_secure(false)
-                .with_expiry(Expiry::OnInactivity(Duration::seconds(10))),
-        );
+    let session_service = ServiceBuilder::new().layer(
+        SessionManagerLayer::new(session_store)
+            .with_secure(false)
+            .with_expiry(Expiry::OnInactivity(Duration::seconds(10))),
+    );
 
     let app = Router::new()
         .route("/", get(handler))
