@@ -303,6 +303,10 @@ impl ExpiredDeletion for DynamoDBStore {
 
 #[async_trait]
 impl SessionStore for DynamoDBStore {
+    async fn create(&self, session_record: &mut Record) -> session_store::Result<()> {
+        self.save(session_record).await
+    }
+
     async fn save(&self, record: &Record) -> session_store::Result<()> {
         let exp_sec = record.expiry_date.unix_timestamp();
         let data_bytes = rmp_serde::to_vec(record).map_err(DynamoDBStoreError::Encode)?;
