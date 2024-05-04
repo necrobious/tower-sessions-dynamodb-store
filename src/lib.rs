@@ -304,6 +304,7 @@ impl ExpiredDeletion for DynamoDBStore {
 #[async_trait]
 impl SessionStore for DynamoDBStore {
     async fn create(&self, session_record: &mut Record) -> session_store::Result<()> {
+        // TODO: use key condition to avoid collisions
         self.save(session_record).await
     }
 
