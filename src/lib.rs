@@ -13,7 +13,7 @@ use aws_sdk_dynamodb::{
     Client,
 };
 use time::OffsetDateTime;
-use tower_sessions_core::{
+use tower_sessions::{
     session::{Id, Record},
     session_store, ExpiredDeletion, SessionStore,
 };
@@ -159,7 +159,7 @@ impl DynamoDBStore {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use tower_sessions::{aws_config, aws_sdk_dynamodb, DynamoDBStore, DynamoDBStoreProps};
+    /// use tower_sessions_dynamodb_store::{aws_config, aws_sdk_dynamodb, DynamoDBStore, DynamoDBStoreProps};
     ///
     /// let store_props = DynamoDBStoreProps::default();
     ///
@@ -303,6 +303,11 @@ impl ExpiredDeletion for DynamoDBStore {
 
 #[async_trait]
 impl SessionStore for DynamoDBStore {
+    async fn create(&self, session_record: &mut Record) -> session_store::Result<()> {
+        // TODO: use key condition to avoid collisions
+        self.save(session_record).await
+    }
+
     async fn save(&self, record: &Record) -> session_store::Result<()> {
         let exp_sec = record.expiry_date.unix_timestamp();
         let data_bytes = rmp_serde::to_vec(record).map_err(DynamoDBStoreError::Encode)?;
