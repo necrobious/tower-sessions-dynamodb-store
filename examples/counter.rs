@@ -3,7 +3,6 @@ use std::net::SocketAddr;
 use axum::{response::IntoResponse, routing::get, Router};
 use serde::{Deserialize, Serialize};
 use time::Duration;
-use tower::ServiceBuilder;
 use tower_sessions::{ExpiredDeletion, Expiry, Session, SessionManagerLayer};
 use tower_sessions_dynamodb_store::{DynamoDBStore, DynamoDBStoreKey, DynamoDBStoreProps};
 const COUNTER_KEY: &str = "counter";
@@ -93,15 +92,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .continuously_delete_expired(tokio::time::Duration::from_secs(60)),
     );
 
-    let session_service = ServiceBuilder::new().layer(
-        SessionManagerLayer::new(session_store)
+    let session_layer = SessionManagerLayer::new(session_store)
+            .with_same_site(tower_cookies::cookie::SameSite::Lax)
             .with_secure(false)
-            .with_expiry(Expiry::OnInactivity(Duration::seconds(10))),
-    );
+            .with_expiry(Expiry::OnInactivity(Duration::seconds(10)));
 
     let app = Router::new()
         .route("/", get(handler))
-        .layer(session_service);
+        .layer(session_layer);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     let listener = tokio::net::TcpListener::bind(&addr).await?;

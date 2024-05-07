@@ -303,9 +303,49 @@ impl ExpiredDeletion for DynamoDBStore {
 
 #[async_trait]
 impl SessionStore for DynamoDBStore {
-    async fn create(&self, session_record: &mut Record) -> session_store::Result<()> {
-        // TODO: use key condition to avoid collisions
-        self.save(session_record).await
+    async fn create(&self, record: &mut Record) -> session_store::Result<()> {
+        let exp_sec = record.expiry_date.unix_timestamp();
+        let data_bytes = rmp_serde::to_vec(record).map_err(DynamoDBStoreError::Encode)?;
+
+        let mut item = HashMap::new();
+        item.insert(
+            self.props.partition_key.name.clone(),
+            AttributeValue::S(self.pk(record.id)),
+        );
+        item.insert(
+            self.props.data_name.clone(),
+            AttributeValue::B(Blob::new(data_bytes)),
+        );
+        item.insert(
+            self.props.expirey_name.clone(),
+            AttributeValue::N(exp_sec.to_string()),
+        );
+
+        // introducing a ConditionExpression to test if the given key already exists,
+        // using suggested ConditionExpression from:
+        // ihttps://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html#Expressions.ConditionExpressions.PreventingOverwrites
+        let mut attribute_names = HashMap::new();
+        let mut condition = "attribute_not_exists(#pk)";
+
+        attribute_names.insert("#pk".to_string(), self.props.partition_key.name.clone());
+
+        if let Some(sk) = &self.props.sort_key {
+            item.insert(sk.name.clone(), AttributeValue::S(self.sk(record.id)));
+            attribute_names.insert("#sk".to_string(), sk.name.clone());
+            condition = "attribute_not_exists(#pk) AND attribute_not_exists(#sk)";
+        }
+
+        self.client
+            .put_item()
+            .table_name(&self.props.table_name)
+            .set_expression_attribute_names(Some(attribute_names))
+            .set_item(Some(item))
+            .condition_expression(condition)
+            .send()
+            .await
+            .map_err(DynamoDBStoreError::DynamoDbPutItem)?;
+
+        Ok(())
     }
 
     async fn save(&self, record: &Record) -> session_store::Result<()> {

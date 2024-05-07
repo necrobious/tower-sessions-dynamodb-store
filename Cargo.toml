@@ -32,6 +32,7 @@ tokio = { version = "1.37", features = ["full"] }
 tower-sessions-core = { version = "0.12", features = ["deletion-task"] }
 tower = { version = "0.4", features = ["timeout"] }
 tokio-test = "0.4"
+tower-cookies = "0.10.0"
 
 [[example]]
 name = "counter"
