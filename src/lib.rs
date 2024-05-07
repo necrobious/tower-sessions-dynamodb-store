@@ -159,7 +159,9 @@ impl DynamoDBStore {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use tower_sessions_dynamodb_store::{aws_config, aws_sdk_dynamodb, DynamoDBStore, DynamoDBStoreProps};
+    /// use tower_sessions_dynamodb_store::{
+    ///     aws_config, aws_sdk_dynamodb, DynamoDBStore, DynamoDBStoreProps,
+    /// };
     ///
     /// let store_props = DynamoDBStoreProps::default();
     ///

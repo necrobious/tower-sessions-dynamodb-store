@@ -93,13 +93,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let session_layer = SessionManagerLayer::new(session_store)
-            .with_same_site(tower_cookies::cookie::SameSite::Lax)
-            .with_secure(false)
-            .with_expiry(Expiry::OnInactivity(Duration::seconds(10)));
+        .with_same_site(tower_cookies::cookie::SameSite::Lax)
+        .with_secure(false)
+        .with_expiry(Expiry::OnInactivity(Duration::seconds(10)));
 
-    let app = Router::new()
-        .route("/", get(handler))
-        .layer(session_layer);
+    let app = Router::new().route("/", get(handler)).layer(session_layer);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     let listener = tokio::net::TcpListener::bind(&addr).await?;
