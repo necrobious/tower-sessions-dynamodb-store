@@ -130,6 +130,9 @@ pub struct DynamoDBStoreProps {
 
     /// The property name to hold the session data blob.
     pub data_name: String,
+
+    /// The number of retrys to attempt whencreating akey, before giving up.
+    pub create_key_max_retry_attempts: usize,
 }
 
 impl Default for DynamoDBStoreProps {
@@ -140,6 +143,7 @@ impl Default for DynamoDBStoreProps {
             sort_key: None,
             expirey_name: "expire_at".to_string(),
             data_name: "data".to_string(),
+            create_key_max_retry_attempts: 5,
         }
     }
 }
@@ -306,48 +310,66 @@ impl ExpiredDeletion for DynamoDBStore {
 #[async_trait]
 impl SessionStore for DynamoDBStore {
     async fn create(&self, record: &mut Record) -> session_store::Result<()> {
-        let exp_sec = record.expiry_date.unix_timestamp();
-        let data_bytes = rmp_serde::to_vec(record).map_err(DynamoDBStoreError::Encode)?;
+        let mut retries_attempted = 0;
+        loop {
+            let exp_sec = record.expiry_date.unix_timestamp();
+            let data_bytes = rmp_serde::to_vec(record).map_err(DynamoDBStoreError::Encode)?;
 
-        let mut item = HashMap::new();
-        item.insert(
-            self.props.partition_key.name.clone(),
-            AttributeValue::S(self.pk(record.id)),
-        );
-        item.insert(
-            self.props.data_name.clone(),
-            AttributeValue::B(Blob::new(data_bytes)),
-        );
-        item.insert(
-            self.props.expirey_name.clone(),
-            AttributeValue::N(exp_sec.to_string()),
-        );
+            let mut item = HashMap::new();
+            item.insert(
+                self.props.partition_key.name.clone(),
+                AttributeValue::S(self.pk(record.id)),
+            );
+            item.insert(
+                self.props.data_name.clone(),
+                AttributeValue::B(Blob::new(data_bytes)),
+            );
+            item.insert(
+                self.props.expirey_name.clone(),
+                AttributeValue::N(exp_sec.to_string()),
+            );
 
-        // introducing a ConditionExpression to test if the given key already exists,
-        // using suggested ConditionExpression from:
-        // ihttps://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html#Expressions.ConditionExpressions.PreventingOverwrites
-        let mut attribute_names = HashMap::new();
-        let mut condition = "attribute_not_exists(#pk)";
+            // introducing a ConditionExpression to test if the given key already exists,
+            // using suggested ConditionExpression from:
+            // ihttps://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html#Expressions.ConditionExpressions.PreventingOverwrites
+            let mut attribute_names = HashMap::new();
+            let mut condition = "attribute_not_exists(#pk)";
 
-        attribute_names.insert("#pk".to_string(), self.props.partition_key.name.clone());
+            attribute_names.insert("#pk".to_string(), self.props.partition_key.name.clone());
 
-        if let Some(sk) = &self.props.sort_key {
-            item.insert(sk.name.clone(), AttributeValue::S(self.sk(record.id)));
-            attribute_names.insert("#sk".to_string(), sk.name.clone());
-            condition = "attribute_not_exists(#pk) AND attribute_not_exists(#sk)";
+            if let Some(sk) = &self.props.sort_key {
+                item.insert(sk.name.clone(), AttributeValue::S(self.sk(record.id)));
+                attribute_names.insert("#sk".to_string(), sk.name.clone());
+                condition = "attribute_not_exists(#pk) AND attribute_not_exists(#sk)";
+            }
+
+            match self
+                .client
+                .put_item()
+                .table_name(&self.props.table_name)
+                .set_expression_attribute_names(Some(attribute_names))
+                .set_item(Some(item))
+                .condition_expression(condition)
+                .send()
+                .await
+            {
+                Ok(_) => return Ok(()),
+                Err(sdk_err) => match sdk_err.as_service_error() {
+                    Some(PutItemError::ConditionalCheckFailedException(_))
+                        if retries_attempted < self.props.create_key_max_retry_attempts =>
+                    {
+                        retries_attempted += 1;
+                        record.id = Id::default();
+                        continue;
+                    }
+                    _ => {
+                        return Err(session_store::Error::from(
+                            DynamoDBStoreError::DynamoDbPutItem(sdk_err),
+                        ))
+                    }
+                },
+            }
         }
-
-        self.client
-            .put_item()
-            .table_name(&self.props.table_name)
-            .set_expression_attribute_names(Some(attribute_names))
-            .set_item(Some(item))
-            .condition_expression(condition)
-            .send()
-            .await
-            .map_err(DynamoDBStoreError::DynamoDbPutItem)?;
-
-        Ok(())
     }
 
     async fn save(&self, record: &Record) -> session_store::Result<()> {
