@@ -60,24 +60,17 @@ Once you have instances of `aws_sdk_dynamodb::Client` and `DynamoDBStoreProps` c
 can be configured and passed to the tower-sessions session manager:
 
 ```rust
-use axum::{
-    error_handling::HandleErrorLayer, http::StatusCode, BoxError, 
-};
+use axum::{response::IntoResponse, routing::get, Router};
 use time::Duration;
-use tower::ServiceBuilder;
-use tower_sessions::{ExpiredDeletion, Expiry, Session, SessionManagerLayer};
+use tower_sessions::{Expiry, SessionManagerLayer};
 use tower_sessions_dynamodb_store::DynamoDBStore;
 
 let session_store = DynamoDBStore::new(client, store_props);
-let session_service = ServiceBuilder::new()
-    .layer(HandleErrorLayer::new(|e: BoxError| async move {
-        StatusCode::BAD_REQUEST
-    }))
-    .layer(
-        SessionManagerLayer::new(session_store)
-            .with_secure(false)
-            .with_expiry(Expiry::OnInactivity(Duration::hours(1))),
-    );
+let session_layer = SessionManagerLayer::new(session_store)
+    .with_secure(false) // only for local testing !!
+    .with_expiry(Expiry::OnInactivity(Duration::seconds(10)));
+
+let app = Router::new().route("/", get(handler)).layer(session_layer);
 ```
 
 You can find a complete [example](examples/counter.rs) in the [example directory](examples).
