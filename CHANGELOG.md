@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+## [0.2.0] - 2024-05-08
+
+### Added
+
+- added `create()` on `DynamoDBStore`, on key conflicts will attempt to retry.
+- added `create_key_max_retry_attempts` property to limit number of retries on `create()` key conflicts. The default is 5 retries.
+
+### Fixed
+
+- updated crate dependencies.
+- minor updates to documentation.
+- fixed rust fmt, clippy, rustdoc errors.
+
 ## [0.1.2] - 2023-12-27
 
 ### Fixed
