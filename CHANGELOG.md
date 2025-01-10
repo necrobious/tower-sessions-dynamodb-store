@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+## [0.3.0] - 2025-01-09
+
+### Fixed
+
+- updated crate dependencies.
+
+
 ## [0.2.0] - 2024-05-08
 
 ### Added
@@ -17,17 +24,20 @@ All notable changes to this project will be documented in this file.
 - minor updates to documentation.
 - fixed rust fmt, clippy, rustdoc errors.
 
+
 ## [0.1.2] - 2023-12-27
 
 ### Fixed
 
 - Updated crate dependencies. 
 
+
 ## [0.1.1] - 2023-12-27
 
 ### Fixed
 
 - fixed error when publishing to crates.io: `the remote server responded with an error: expected at most 5 keywords per crate` 
+
 
 ## [0.1.0] - 2023-12-27
 
