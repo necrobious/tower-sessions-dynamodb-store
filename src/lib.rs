@@ -219,8 +219,8 @@ impl ExpiredDeletion for DynamoDBStore {
     // delete_expired runs, preventing the scan from returning larger results,
     // taking longer, costing more, and increasing the chance for a failure
     // while batch processing.
-    // NOTE: a DynamoDB TTL does not offer an SLA on deleting the columns below 48
-    // hours. While typically items are removed within seconds of their TLL
+    // NOTE: a DynamoDB TTL does not offer an SLA on deleting the columns below
+    // 48 hours. While typically items are removed within seconds of their TLL
     // value, they can remain in the table for up to 2 days before AWS removes
     // them.
     //
@@ -329,9 +329,9 @@ impl SessionStore for DynamoDBStore {
                 AttributeValue::N(exp_sec.to_string()),
             );
 
-            // introducing a ConditionExpression to test if the given key already exists,
-            // using suggested ConditionExpression from:
-            // ihttps://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html#Expressions.ConditionExpressions.PreventingOverwrites
+            // introducing a ConditionExpression to test if the given key
+            // already exists, using suggested ConditionExpression from:
+            // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html#Expressions.ConditionExpressions.PreventingOverwrites
             let mut attribute_names = HashMap::new();
             let mut condition = "attribute_not_exists(#pk)";
 

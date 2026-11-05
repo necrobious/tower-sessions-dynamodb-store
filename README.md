@@ -117,3 +117,7 @@ rustdoc
 RUSTDOCFLAGS="-D rustdoc::broken-intra-doc-links" cargo doc --all-features --no-deps
 ```
 
+audit
+```
+cargo audit
+```

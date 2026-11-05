@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+## [0.4.0] - 2026-11-05
+
+### Fixed
+
+- updated crate dependencies.
+- updating `aws-sdk-dynamodb` dependencies to activate only needed features. #3
+
+
 ## [0.3.0] - 2025-01-09
 
 ### Fixed
